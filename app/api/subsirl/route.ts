@@ -2,11 +2,13 @@ import { NextResponse } from "next/server";
 import Groq from "groq-sdk";
 import { z } from "zod";
 import { zfd } from "zod-form-data";
+import { LangObj } from "@/types/lang";
 
 const groq = new Groq();
 
 const schema = zfd.formData({
   audio: z.union([zfd.text(), zfd.file()]),
+  config: z.string(),
 });
 
 export async function POST(req: Request) {
@@ -20,7 +22,7 @@ export async function POST(req: Request) {
     const { data, success } = schema.safeParse(await req.formData());
     if (!success) return new Response("Invalid request", { status: 400 });
 
-    const transcript = await getTranscript(data.audio);
+    const transcript = await getTranscript(data.audio, JSON.parse(data.config));
     if (!transcript) return new Response("Invalid audio", { status: 400 });
 
     return NextResponse.json({ transcript });
@@ -33,7 +35,7 @@ export async function POST(req: Request) {
   }
 }
 
-async function getTranscript(input: string | File) {
+async function getTranscript(input: string | File, config: LangObj) {
   if (typeof input === "string") return input;
 
   try {
@@ -41,7 +43,7 @@ async function getTranscript(input: string | File) {
       file: input,
       model: "whisper-large-v3",
       temperature: 0.1,
-      language: "hi",
+      language: config.fromLanguage.symbol.toLowerCase(),
     });
 
     return text.trim() || null;

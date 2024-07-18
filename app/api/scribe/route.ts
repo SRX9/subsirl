@@ -2,11 +2,13 @@ import { NextResponse } from "next/server";
 import Groq from "groq-sdk";
 import { z } from "zod";
 import { zfd } from "zod-form-data";
+import { LangObj } from "@/types/lang";
 
 const groq = new Groq();
 
 const schema = zfd.formData({
   text: z.string(),
+  config: z.string(),
 });
 
 export async function POST(req: Request) {
@@ -20,7 +22,10 @@ export async function POST(req: Request) {
     const { data, success } = schema.safeParse(await req.formData());
     if (!success) return new Response("Invalid request", { status: 400 });
 
-    const translation = await translateText(data?.text);
+    const translation = await translateText(
+      data?.text,
+      JSON.parse(data.config)
+    );
 
     return NextResponse.json({ translation });
   } catch (error) {
@@ -32,15 +37,15 @@ export async function POST(req: Request) {
   }
 }
 
-async function translateText(text: string): Promise<string> {
+async function translateText(text: string, config: LangObj): Promise<string> {
   try {
     const chatCompletion = await groq.chat.completions.create({
       messages: [
         {
           role: "user",
-          content: `Translate the following Hindi language text to English: "${text}"
-                    Make sure to just respond with translated text, nothing else.
-                    Translation:-`,
+          content: `Make sure to just respond with translated text, nothing else.
+          Translate the given text from ${config.fromLanguage.englishName} language to ${config.toLanguage.englishName}: "${text}"
+          Translated text in ${config.toLanguage.englishName}:-`,
         },
       ],
       model: "llama3-70b-8192",

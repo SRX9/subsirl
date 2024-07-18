@@ -3,7 +3,7 @@ import { Inter as FontSans } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { Toaster } from "sonner";
-import Image from "next/image";
+import { Providers } from "./Providers";
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -24,6 +24,7 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <meta name="viewport" content="width=device-width" />
+        <meta charSet="UTF-8" />
       </head>
       <body
         className={cn(
@@ -31,7 +32,9 @@ export default function RootLayout({
           fontSans.variable
         )}
       >
-        {children}
+        <Providers>
+          <main className="dark text-foreground bg-background">{children}</main>
+        </Providers>
         <Toaster richColors theme="system" />
       </body>
     </html>
