@@ -25,7 +25,12 @@ export async function POST(req: Request) {
     const transcript = await getTranscript(data.audio, JSON.parse(data.config));
     if (!transcript) return new Response("Invalid audio", { status: 400 });
 
-    return NextResponse.json({ transcript });
+    const translation = await translateText(
+      transcript,
+      JSON.parse(data.config)
+    );
+
+    return NextResponse.json({ translation });
   } catch (error) {
     console.error("Error in translation API:", error);
     return NextResponse.json(
@@ -49,5 +54,35 @@ async function getTranscript(input: string | File, config: LangObj) {
     return text.trim() || null;
   } catch {
     return null;
+  }
+}
+
+async function translateText(text: string, config: LangObj): Promise<string> {
+  try {
+    const chatCompletion = await groq.chat.completions.create({
+      messages: [
+        {
+          role: "user",
+          content: `Make sure to just respond with translated text, nothing else.
+          Translate the given text from ${config.fromLanguage.englishName} language to ${config.toLanguage.englishName}: "${text}"
+          Translated text in ${config.toLanguage.englishName}:-`,
+        },
+      ],
+      model: "llama3-70b-8192",
+      temperature: 0.7,
+      max_tokens: 1024,
+      top_p: 1,
+      stream: true,
+      stop: null,
+    });
+
+    let str = "";
+    for await (const chunk of chatCompletion) {
+      str = `${str} ${chunk.choices[0]?.delta?.content || ""}`;
+    }
+    return str;
+  } catch (error) {
+    console.error("Error in translation:", error);
+    return "";
   }
 }

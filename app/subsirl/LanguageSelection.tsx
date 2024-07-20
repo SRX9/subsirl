@@ -10,10 +10,11 @@ const LanguageSelection = ({
 }) => {
   return (
     <>
-      <div className="flex w-full px-3 sm:max-w-[30vw] justify-start items-center gap-3 ">
+      <div className="flex w-full  sm:max-w-[30vw] justify-start items-center gap-3 ">
         <Select
           label="From"
           size="sm"
+          variant="flat"
           radius="md"
           defaultSelectedKeys={[
             (languageSelected.fromLanguage.englishName as any) ||
@@ -36,6 +37,7 @@ const LanguageSelection = ({
         <Select
           size="sm"
           label="To"
+          variant="flat"
           radius="md"
           placeholder="Select a Language"
           className=" min-w-xs "

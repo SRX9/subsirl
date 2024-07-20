@@ -137,7 +137,6 @@ body {
 .sub_hw {
   font-family: sans-serif;
   font-weight: bold;
-  font-size: 10vmin;
   color: white;
   -webkit-text-stroke: 0.02em black;
   text-shadow: 0.04em 0.04em 0.04em rgba(0, 0, 0, 0.4);
@@ -146,7 +145,6 @@ body {
 .sub_fb {
   font-family: sans-serif;
   font-weight: bold;
-  font-size: 10vmin;
   color: rgba(244, 244, 100, 1);
   text-shadow: 0 0 0.2em rgba(0, 0, 0, 0.5);
 }
@@ -154,25 +152,23 @@ body {
 .sub_cc {
   font-family: Consolas, Menlo, Roboto Mono, DejaVu Sans Mono, inherit;
   font-weight: normal;
-  font-size: 8vmin;
   color: white;
+  padding-left: 2vmin;
   background: black;
 }
 
 .sub_tb {
   font-family: sans-serif;
   font-weight: normal;
-  font-size: 8vmin;
   color: white;
   background: rgba(0, 0, 0, 0.4);
-  padding: 2vmin;
+  padding: 1vmin 2vmin;
   border-radius: 4vmin;
 }
 
 .sub_cf {
   font-family: sans-serif;
   font-weight: bold;
-  font-size: 11vmin;
   color: #e0e0e0;
   -webkit-text-stroke: 0.04em #000;
   display: inline-block;
@@ -183,8 +179,12 @@ body {
 .sub_wo {
   font-family: sans-serif;
   font-weight: bold;
-  font-size: 10vmin;
   color: white;
   -webkit-text-stroke: 0.03em black;
   text-shadow: 0.05em 0.05em 0 rgba(0, 0, 0, 1);
+}
+
+.text-shadow {
+  text-shadow: 1px 1px 2px black, 0 0 1em gray, 0 0 0.2em gray;
+  color: white;
 }
