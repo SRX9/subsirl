@@ -3,8 +3,8 @@ import { Inter as FontSans } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { Toaster } from "sonner";
-import Image from "next/image";
-
+import { Providers } from "./Providers";
+import { ClerkProvider } from "@clerk/nextjs";
 const fontSans = FontSans({
   subsets: ["latin"],
   variable: "--font-sans",
@@ -21,19 +21,38 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <head>
-        <meta name="viewport" content="width=device-width" />
-      </head>
-      <body
-        className={cn(
-          "min-h-screen bg-background overflow-hidden font-sans antialiased relative ",
-          fontSans.variable
-        )}
-      >
-        {children}
-        <Toaster richColors theme="system" />
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="en">
+        <head>
+          <meta name="viewport" content="width=device-width" />
+          <meta charSet="UTF-8" />
+          <link rel="preconnect" href="https://fonts.googleapis.com" />
+          <link rel="preconnect" href="https://fonts.gstatic.com" />
+          <link
+            href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@500&display=swap"
+            rel="stylesheet"
+          />
+        </head>
+        <body
+          className={cn(
+            "min-h-screen bg-background overflow-hidden font-sans antialiased relative ",
+            fontSans.variable
+          )}
+        >
+          <Providers>
+            <main className="dark text-foreground bg-background">
+              {children}
+            </main>
+          </Providers>
+          <Toaster
+            richColors
+            theme="system"
+            closeButton
+            expand
+            visibleToasts={1}
+          />
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }
