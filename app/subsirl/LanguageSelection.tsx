@@ -30,9 +30,11 @@ const LanguageSelection = ({
             }))
           }
         >
-          {LanguageOptions?.map((item: Language) => (
-            <SelectItem key={item.englishName}>{item.title}</SelectItem>
-          ))}
+          {LanguageOptions?.filter((item: Language) => item.isToEnabled)?.map(
+            (item: Language) => (
+              <SelectItem key={item.englishName}>{item.title}</SelectItem>
+            )
+          )}
         </Select>
         <Select
           size="sm"

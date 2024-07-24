@@ -68,7 +68,7 @@ async function translateText(text: string, config: LangObj): Promise<string> {
           Translated text in ${config.toLanguage.englishName}:-`,
         },
       ],
-      model: "llama3-70b-8192",
+      model: "llama-3.1-70b-versatile",
       temperature: 0.7,
       max_tokens: 1024,
       top_p: 1,
