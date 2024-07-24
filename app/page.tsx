@@ -10,14 +10,9 @@ import LanguageSelection from "./subsirl/LanguageSelection";
 import { BorderBeam } from "@/components/magicui/border-beam";
 import Ripple from "@/components/magicui/ripple";
 import DotPattern from "@/components/magicui/dot-pattern";
-import { Roboto_Slab } from "next/font/google";
 import { toast } from "sonner";
 import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
-
-export const Roboto_Slab_Font = Roboto_Slab({
-  subsets: ["latin"],
-  variable: "--font-sans",
-});
+import { currentUser } from "@clerk/nextjs/server";
 
 export default function RealtimeTranslation() {
   const [translatedSubtitles, setTranslatedSubtitles] = useState("");
@@ -374,10 +369,7 @@ export default function RealtimeTranslation() {
           >
             {loading && <BorderBeam colorFrom="#18181B" colorTo="#F4F4F5" />}
             <p
-              className={cn(
-                Roboto_Slab_Font.className,
-                " text-lg pb-5  sm:text-2xl leading-8 "
-              )}
+              className={cn(" text-lg pb-5  sm:text-2xl leading-8 roboto-slab")}
             >
               {translatedSubtitles
                 ?.replaceAll('"', "")

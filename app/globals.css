@@ -126,6 +126,13 @@ body {
   );
 }
 
+.roboto-slab {
+  font-family: "Roboto Slab", serif;
+  font-optical-sizing: auto;
+  font-weight: 500;
+  font-style: normal;
+}
+
 .dark .border-pulsing {
   border-color: rgba(255, 255, 255, 0.2);
 }

@@ -26,6 +26,12 @@ export default function RootLayout({
         <head>
           <meta name="viewport" content="width=device-width" />
           <meta charSet="UTF-8" />
+          <link rel="preconnect" href="https://fonts.googleapis.com" />
+          <link rel="preconnect" href="https://fonts.gstatic.com" />
+          <link
+            href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@500&display=swap"
+            rel="stylesheet"
+          />
         </head>
         <body
           className={cn(
