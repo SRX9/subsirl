@@ -12,9 +12,20 @@ import Ripple from "@/components/magicui/ripple";
 import DotPattern from "@/components/magicui/dot-pattern";
 import { toast } from "sonner";
 import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
-import { currentUser } from "@clerk/nextjs/server";
+import { useAuth } from "@clerk/nextjs";
+import {
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+} from "@nextui-org/react";
+import Image from "next/image";
+import { BottomFooter } from "@/components/BottomFooter";
 
 export default function RealtimeTranslation() {
+  const { isLoaded, userId, sessionId, getToken } = useAuth();
+
   const [translatedSubtitles, setTranslatedSubtitles] = useState("");
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [languageSelected, setLanguageSelected] = useState<LangObj>({
@@ -24,6 +35,7 @@ export default function RealtimeTranslation() {
   const [loading, setLoading] = useState(false);
   const [isCameraOn, setIsCameraOn] = useState(true);
   const [isFrontCamera, setIsFrontCamera] = useState(true);
+  const [modelMenuOpen, setModelMenuOpen] = useState(false);
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const subtitlesRef = useRef<HTMLDivElement | null>(null);
@@ -33,13 +45,20 @@ export default function RealtimeTranslation() {
   >([]);
   const nextId = useRef(0);
 
+  const isLoggedIn = isLoaded && userId;
+
   useEffect(() => {
-    if (isCameraOn) {
-      startCamera();
+    if (isLoggedIn) {
+      if (isCameraOn) {
+        startCamera();
+      } else {
+        stopCamera();
+      }
     } else {
+      setModelMenuOpen(true);
       stopCamera();
     }
-  }, [isCameraOn, isFrontCamera]);
+  }, [isCameraOn, isFrontCamera, isLoggedIn]);
 
   useEffect(() => {
     if (subtitlesRef.current) {
@@ -62,17 +81,16 @@ export default function RealtimeTranslation() {
         toast.message("To use Video Feed, Give Camera Permission.", {
           duration: 2000,
         });
-        setIsCameraOn(false); // Turn off camera state if access is denied
+        setIsCameraOn(false);
       }
     } else {
       console.error("getUserMedia is not supported in this browser");
       toast.message("To use Video Feed, Give Camera Permission.", {
         duration: 2000,
       });
-      setIsCameraOn(false); // Turn off camera state if getUserMedia is not supported
+      setIsCameraOn(false);
     }
   };
-
   const stopCamera = () => {
     if (streamRef.current) {
       streamRef.current.getTracks().forEach((track) => track.stop());
@@ -86,8 +104,12 @@ export default function RealtimeTranslation() {
     setIsCameraOn(!isCameraOn);
   };
 
-  const switchCamera = () => {
-    setIsFrontCamera(!isFrontCamera);
+  const switchCamera = async () => {
+    setIsFrontCamera((prev) => !prev);
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => track.stop());
+    }
+    await startCamera();
   };
 
   useMicVAD({
@@ -97,7 +119,7 @@ export default function RealtimeTranslation() {
       setIsSpeaking(false);
       const wav = utils.encodeWAV(audio);
       const blob = new Blob([wav], { type: "audio/wav" });
-      enqueueTranscription(blob, languageSelected);
+      enqueueTranscription(blob, languageSelected, isLoggedIn);
     },
     workletURL: "/vad.worklet.bundle.min.js",
     modelURL: "/silero_vad.onnx",
@@ -186,8 +208,14 @@ export default function RealtimeTranslation() {
 
   const enqueueTranscription = async (
     audioBlob: Blob,
-    languageSelected: LangObj
+    languageSelected: LangObj,
+    isLoggedIn: boolean
   ) => {
+    if (isLoggedIn) {
+      toast.message("Please login to use SubsIRL");
+      return;
+    }
+
     const id = nextId.current++;
     const promise = getTranscribe(audioBlob, languageSelected);
     translationQueue.current.push({ id, promise });
@@ -199,7 +227,7 @@ export default function RealtimeTranslation() {
     <ShineBorder
       borderRadius={16}
       className={cn(
-        "relative h-screen w-full overflow-hidden flex flex-col items-center justify-center "
+        "relative h-[calc(100dvh)]  w-full overflow-hidden flex flex-col  dark bg-background text-foreground   items-center justify-center "
       )}
       color={["#18181B", "#A1A1AA", "#F4F4F5"]}
       borderWidth={isSpeaking ? 5 : 0}
@@ -381,48 +409,104 @@ export default function RealtimeTranslation() {
         </div>
         <div className="absolute top-0 flex justify-between items-center gap-3 w-full">
           <Button isIconOnly size="lg" variant="light" onClick={switchCamera}>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              width="30"
-              height="30"
-              fill="none"
-            >
-              <path
-                d="M5 5.96552H8.15M12 5.96552H10.25M8.15 5.96552H10.25M8.15 5.96552V5M10.25 5.96552C9.88076 7.28593 9.10754 8.53411 8.225 9.63103M5.975 12C6.68843 11.344 7.4942 10.5394 8.225 9.63103M8.225 9.63103C7.775 9.10345 7.145 8.24984 6.965 7.86364M8.225 9.63103L9.575 11.0345"
-                stroke="currentColor"
-                stroke-width="1.5"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              />
-              <path
-                d="M7.02231 16.9777C7.07674 18.6978 7.26397 19.7529 7.90796 20.5376C8.07418 20.7401 8.25989 20.9258 8.46243 21.092C9.56878 22 11.2125 22 14.5 22C17.7875 22 19.4312 22 20.5376 21.092C20.7401 20.9258 20.9258 20.7401 21.092 20.5376C22 19.4312 22 17.7875 22 14.5C22 11.2125 22 9.56878 21.092 8.46243C20.9258 8.25989 20.7401 8.07418 20.5376 7.90796C19.7563 7.26676 18.707 7.07837 17 7.02303M7.02231 16.9777C5.30217 16.9233 4.24713 16.736 3.46243 16.092C3.25989 15.9258 3.07418 15.7401 2.90796 15.5376C2 14.4312 2 12.7875 2 9.5C2 6.21252 2 4.56878 2.90796 3.46243C3.07418 3.25989 3.25989 3.07418 3.46243 2.90796C4.56878 2 6.21252 2 9.5 2C12.7875 2 14.4312 2 15.5376 2.90796C15.7401 3.07418 15.9258 3.25989 16.092 3.46243C16.736 4.24713 16.9233 5.30217 16.9777 7.02231C16.9777 7.02231 16.9777 7.02231 17 7.02303M7.02231 16.9777L17 7.02303"
-                stroke="currentColor"
-                stroke-width="1.5"
-              />
-              <path
-                d="M13 19L13.8333 17M18 19L17.1667 17M13.8333 17L15.5 13L17.1667 17M13.8333 17H17.1667"
-                stroke="currentColor"
-                stroke-width="1.5"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              />
-            </svg>
+            <Image
+              src="/android-chrome-192x192.png"
+              width={"50"}
+              height={"50"}
+              className=" object-cover rounded-full "
+              alt="SubsIRL - Subtitles in real life Logo"
+            />
           </Button>
           <LanguageSelection
             languageSelected={languageSelected}
             setLanguageSelected={setLanguageSelected}
           />
-          <SignedIn>
-            <Button isIconOnly size="lg" variant="faded" onClick={switchCamera}>
-              <UserButton />
-            </Button>
-          </SignedIn>
-          <SignedOut>
-            <SignInButton />
-          </SignedOut>
+          <Button
+            isIconOnly
+            size="lg"
+            variant="faded"
+            onClick={() => setModelMenuOpen(true)}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              width="24"
+              height="24"
+              fill="none"
+            >
+              <path
+                d="M2 18C2 16.4596 2 15.6893 2.34673 15.1235C2.54074 14.8069 2.80693 14.5407 3.12353 14.3467C3.68934 14 4.45956 14 6 14C7.54044 14 8.31066 14 8.87647 14.3467C9.19307 14.5407 9.45926 14.8069 9.65327 15.1235C10 15.6893 10 16.4596 10 18C10 19.5404 10 20.3107 9.65327 20.8765C9.45926 21.1931 9.19307 21.4593 8.87647 21.6533C8.31066 22 7.54044 22 6 22C4.45956 22 3.68934 22 3.12353 21.6533C2.80693 21.4593 2.54074 21.1931 2.34673 20.8765C2 20.3107 2 19.5404 2 18Z"
+                stroke="currentColor"
+                stroke-width="1.5"
+              />
+              <path
+                d="M14 18C14 16.4596 14 15.6893 14.3467 15.1235C14.5407 14.8069 14.8069 14.5407 15.1235 14.3467C15.6893 14 16.4596 14 18 14C19.5404 14 20.3107 14 20.8765 14.3467C21.1931 14.5407 21.4593 14.8069 21.6533 15.1235C22 15.6893 22 16.4596 22 18C22 19.5404 22 20.3107 21.6533 20.8765C21.4593 21.1931 21.1931 21.4593 20.8765 21.6533C20.3107 22 19.5404 22 18 22C16.4596 22 15.6893 22 15.1235 21.6533C14.8069 21.4593 14.5407 21.1931 14.3467 20.8765C14 20.3107 14 19.5404 14 18Z"
+                stroke="currentColor"
+                stroke-width="1.5"
+              />
+              <path
+                d="M2 6C2 4.45956 2 3.68934 2.34673 3.12353C2.54074 2.80693 2.80693 2.54074 3.12353 2.34673C3.68934 2 4.45956 2 6 2C7.54044 2 8.31066 2 8.87647 2.34673C9.19307 2.54074 9.45926 2.80693 9.65327 3.12353C10 3.68934 10 4.45956 10 6C10 7.54044 10 8.31066 9.65327 8.87647C9.45926 9.19307 9.19307 9.45926 8.87647 9.65327C8.31066 10 7.54044 10 6 10C4.45956 10 3.68934 10 3.12353 9.65327C2.80693 9.45926 2.54074 9.19307 2.34673 8.87647C2 8.31066 2 7.54044 2 6Z"
+                stroke="currentColor"
+                stroke-width="1.5"
+              />
+              <path
+                d="M14 6C14 4.45956 14 3.68934 14.3467 3.12353C14.5407 2.80693 14.8069 2.54074 15.1235 2.34673C15.6893 2 16.4596 2 18 2C19.5404 2 20.3107 2 20.8765 2.34673C21.1931 2.54074 21.4593 2.80693 21.6533 3.12353C22 3.68934 22 4.45956 22 6C22 7.54044 22 8.31066 21.6533 8.87647C21.4593 9.19307 21.1931 9.45926 20.8765 9.65327C20.3107 10 19.5404 10 18 10C16.4596 10 15.6893 10 15.1235 9.65327C14.8069 9.45926 14.5407 9.19307 14.3467 8.87647C14 8.31066 14 7.54044 14 6Z"
+                stroke="currentColor"
+                stroke-width="1.5"
+              />
+            </svg>
+          </Button>
         </div>
       </div>
+      <Modal
+        isOpen={modelMenuOpen || !isLoggedIn}
+        hideCloseButton
+        onOpenChange={setModelMenuOpen}
+      >
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalBody className="p-10 dark bg-background text-foreground  ">
+                <div className=" flex w-full pb-10 font-semibold text-xl justify-center items-center gap-3">
+                  <Image
+                    src="/android-chrome-192x192.png"
+                    width={"36"}
+                    height={"36"}
+                    className=" object-cover rounded-full "
+                    alt="SubsIRL - Subtitles in real life Logo"
+                  />
+                  SubsIRL
+                </div>
+                <div className=" flex w-full justify-center items-center gap-5">
+                  {isLoggedIn ? (
+                    <>
+                      <SignedIn>
+                        <Button isIconOnly size="lg" variant="faded">
+                          <UserButton />
+                        </Button>
+                      </SignedIn>
+                    </>
+                  ) : (
+                    <div className="w-full flex flex-col justify-center items-center gap-3">
+                      <div className="text-center text-default-600 ">
+                        "Please Login to use SubsIRL"
+                      </div>
+                      <SignedOut>
+                        <div className=" border p-3 py-2 rounded-xl shadow-md ">
+                          <SignInButton />
+                        </div>
+                      </SignedOut>
+                    </div>
+                  )}
+                </div>
+                <div className="w-full flex justify-center pt-5">
+                  <BottomFooter />
+                </div>
+              </ModalBody>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
     </ShineBorder>
   );
 }
