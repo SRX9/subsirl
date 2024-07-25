@@ -91,6 +91,9 @@ export default function RealtimeTranslation() {
       setIsCameraOn(false);
     }
   };
+  const toggleCamera = () => {
+    setIsCameraOn((prev) => !prev);
+  };
   const stopCamera = () => {
     if (streamRef.current) {
       streamRef.current.getTracks().forEach((track) => track.stop());
@@ -100,14 +103,11 @@ export default function RealtimeTranslation() {
     }
   };
 
-  const toggleCamera = () => {
-    setIsCameraOn((prev) => !prev);
-  };
-
   const switchCamera = async (isFrontCamera: boolean) => {
-    setIsFrontCamera(!isFrontCamera);
+    const newIsFrontCamera = !isFrontCamera;
+    setIsFrontCamera(newIsFrontCamera);
     stopCamera();
-    await startCamera(!isFrontCamera);
+    await startCamera(newIsFrontCamera);
   };
 
   useMicVAD({
