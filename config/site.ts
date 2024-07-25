@@ -5,8 +5,8 @@ export const AppHostDomain =
   process.env.NEXT_PUBLIC_HOST_DOMAIN || "subtitlesinreal.life";
 
 export const siteConfig = {
-  name: "SubsIRL - Subtitles for Real Life",
-  twitterHandle: "@subsirl",
+  name: "SubsIRL - Subtitles in Real Life",
+  twitterHandle: "@s_r_x_9",
   description:
     "SubsIRL turns real life into a movie with live subtitles! Our easy-to-use app adds captions to everyday conversations, making life more accessible and fun for everyone. Perfect for learning languages, helping with hearing difficulties, or just adding a cool twist to your day.",
   ogImage: `${AppHost}/subsirl-banner.png`,
