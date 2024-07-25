@@ -119,7 +119,7 @@ export default function RealtimeTranslation() {
       setIsSpeaking(false);
       const wav = utils.encodeWAV(audio);
       const blob = new Blob([wav], { type: "audio/wav" });
-      enqueueTranscription(blob, languageSelected, isLoggedIn);
+      enqueueTranscription(blob, languageSelected, !!isLoggedIn);
     },
     workletURL: "/vad.worklet.bundle.min.js",
     modelURL: "/silero_vad.onnx",
@@ -489,7 +489,7 @@ export default function RealtimeTranslation() {
                   ) : (
                     <div className="w-full flex flex-col justify-center items-center gap-3">
                       <div className="text-center text-default-600 ">
-                        "Please Login to use SubsIRL"
+                        Please Login to use SubsIRL
                       </div>
                       <SignedOut>
                         <div className=" border p-3 py-2 rounded-xl shadow-md ">
