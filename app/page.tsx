@@ -50,7 +50,7 @@ export default function RealtimeTranslation() {
   useEffect(() => {
     if (isLoggedIn) {
       if (isCameraOn) {
-        startCamera();
+        startCamera(isFrontCamera);
       } else {
         stopCamera();
       }
@@ -66,7 +66,7 @@ export default function RealtimeTranslation() {
     }
   }, [translatedSubtitles]);
 
-  const startCamera = async () => {
+  const startCamera = async (isFrontCamera: boolean) => {
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
@@ -104,12 +104,10 @@ export default function RealtimeTranslation() {
     setIsCameraOn((prev) => !prev);
   };
 
-  const switchCamera = async () => {
-    setIsFrontCamera((prev) => !prev);
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach((track) => track.stop());
-    }
-    await startCamera();
+  const switchCamera = async (isFrontCamera: boolean) => {
+    setIsFrontCamera(!isFrontCamera);
+    stopCamera();
+    await startCamera(!isFrontCamera);
   };
 
   useMicVAD({
@@ -347,7 +345,7 @@ export default function RealtimeTranslation() {
                   isIconOnly
                   size="lg"
                   variant="flat"
-                  onClick={switchCamera}
+                  onClick={() => switchCamera(isFrontCamera)}
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -408,7 +406,7 @@ export default function RealtimeTranslation() {
           </ScrollShadow>
         </div>
         <div className="absolute top-0 flex justify-between items-center gap-3 w-full">
-          <Button isIconOnly size="lg" variant="light" onClick={switchCamera}>
+          <Button isIconOnly size="lg" variant="light">
             <Image
               src="/android-chrome-192x192.png"
               width={"50"}
