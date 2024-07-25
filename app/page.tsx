@@ -101,7 +101,7 @@ export default function RealtimeTranslation() {
   };
 
   const toggleCamera = () => {
-    setIsCameraOn(!isCameraOn);
+    setIsCameraOn((prev) => !prev);
   };
 
   const switchCamera = async () => {
@@ -211,7 +211,7 @@ export default function RealtimeTranslation() {
     languageSelected: LangObj,
     isLoggedIn: boolean
   ) => {
-    if (isLoggedIn) {
+    if (!isLoggedIn) {
       toast.message("Please login to use SubsIRL");
       return;
     }
