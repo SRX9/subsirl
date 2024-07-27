@@ -473,7 +473,7 @@ export default function RealtimeTranslation() {
                     className=" object-cover rounded-full "
                     alt="SubsIRL - Subtitles in real life Logo"
                   />
-                  SubsIRL
+                  SubsIRL (Beta Version)
                 </div>
                 <div className=" flex w-full justify-center items-center gap-5">
                   {isLoggedIn ? (
