@@ -124,7 +124,7 @@ export default function RealtimeTranslation() {
     positiveSpeechThreshold: 0.9, // Higher sensitivity for detecting speech
     negativeSpeechThreshold: 0.1, // Lower sensitivity for detecting non-speech
     redemptionFrames: 2, // Quick transition to non-speech state
-    frameSamples: 350, // Default frame size
+    frameSamples: 600, // Default frame size
     preSpeechPadFrames: 5, // Minimal pre-speech padding
     minSpeechFrames: 2,
     ortConfig(ort: {
